@@ -177,6 +177,17 @@ button:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible
     <section class="card">
       <div class="day-title"><div><div class="muted" id="dayPersian"></div><h2 id="dayName">Saturday</h2></div><span class="pill" id="dayBadge">Gym day</span></div>
       <div id="events"></div>
+      <section class="card" style="margin:14px 0 0;padding:14px;background:#111d32;border:1px solid #344563">
+        <h3 style="margin:0 0 8px">🎯 Daily independent-study goal</h3>
+        <p class="muted" style="margin:0 0 10px">Your personal target is 5 hours (300 minutes). Log the time you actually studied; breaks and classes don't count.</p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <label for="studyMinutes">Minutes studied at home today</label>
+          <input id="studyMinutes" type="number" min="0" max="1440" step="5" value="0" style="width:105px;padding:9px;border:1px solid #344563;border-radius:10px;background:#101a2e;color:var(--ink);font:inherit">
+          <button class="primary" type="button" id="saveStudyMinutes">Save</button>
+        </div>
+        <p id="studyProgress" class="small-label" aria-live="polite" style="margin:10px 0 0">0 / 300 min</p>
+        <div style="height:9px;background:#26344c;border-radius:99px;overflow:hidden;margin-top:7px"><div id="studyBar" style="height:100%;width:0%;background:#8b83f6;border-radius:99px"></div></div>
+      </section>
       <div class="actions">
         <button class="primary" id="checkAll">Mark day complete</button>
         <button id="clearDay">Clear day checks</button>
@@ -270,7 +281,18 @@ button:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible
       <p class="small-label" id="backupStatus" aria-live="polite">Your data stays in this browser unless you export a backup.</p>
     </section>
   </div>
-  <p class="note" style="margin-top:16px">Your progress is saved in this browser on this device. Study blocks are a suggested plan: take breaks, adjust them around homework and travel, and don't sacrifice sleep to finish every block.</p>
+  <section class="card" style="margin-top:16px">
+    <h2>☁️ Cloud sync across devices</h2>
+    <p class="muted">Use the same sync password on each device. Upload sends this device's planner data to GitHub; Download replaces this device's data with the cloud copy.</p>
+    <label for="syncPassword" class="small-label">Sync password</label>
+    <input id="syncPassword" type="password" autocomplete="current-password" placeholder="Enter your private sync password" style="display:block;width:100%;max-width:420px;margin-top:6px;padding:11px;border:1px solid #344563;border-radius:12px;background:#101a2e;color:var(--ink);font:inherit">
+    <div class="actions">
+      <button type="button" class="primary" id="cloudUpload">Upload this device to cloud</button>
+      <button type="button" id="cloudDownload">Download cloud data</button>
+    </div>
+    <p class="small-label" id="cloudStatus" role="status" aria-live="polite">Cloud sync is ready when the Worker secrets and GitHub settings are configured.</p>
+  </section>
+  <p class="note" style="margin-top:16px">Your progress is saved in this browser on this device. Study blocks are a suggested plan: take breaks, adjust them around homework and travel, and don't sacrifice sleep to finish every block. Gym days currently allow about 4 hours of independent study; reaching 5 hours on those days would require changing another fixed commitment.</p>
   <footer>Class 7-4 · Saturday to Friday · Personal study planner</footer>
 </main>
 <script>
@@ -281,20 +303,20 @@ const subjects = [
  ["💻","فناوری","Technology"],["🌱","سبک زندگی","Life skills"]
 ];
 const days = [
- {en:"Saturday",fa:"شنبه",badge:"🏋️ Gym 5–7 PM",events:[
- ["Until 2:00 PM","🏫 School","School"],["2:30–3:00","🍽️ Lunch","Break"],["3:00–4:00","📐 Mathematics","Study"],["4:00–4:45","🔬 Science","Study"],["4:45–5:00","Get ready / travel","Break"],["5:00–7:00","🏋️ Gym","Activity"],["7:00–7:30","Dinner and rest","Break"],["7:30–8:30","📖 Persian literature","Study"],["8:30–9:00","📗 Quran","Study"],["9:00–9:15","Break","Break"],["9:15–10:00","📐 Mathematics practice","Study"]], focus:[0,1,2,6]},
+ {en:"Saturday",fa:"شنبه",badge:"🏋️ Gym 4–6 PM · Study before gym",events:[
+ ["Until 2:00 PM","🏫 School","School"],["2:00–2:30","🚗 Travel home from school","Travel"],["2:30–3:00","🍽️ Lunch","Break"],["3:00–3:30","📐 Mathematics — pre-gym study","Study"],["3:30–4:00","🚗 Travel to gym","Travel"],["4:00–6:00","🏋️ Gym","Activity"],["6:00–6:30","🚗 Travel home","Travel"],["6:30–7:00","🍽️ Dinner and rest","Break"],["7:00–8:30","📖 Persian literature — study block 2","Study"],["8:30–8:45","Break","Break"],["8:45–10:15","📗 Quran and homework — study block 3","Study"],["10:15–10:30","Break","Break"],["10:30–11:00","📐 Mathematics practice — review","Study"]], focus:[3,8,10,12]},
  {en:"Sunday",fa:"یکشنبه",badge:"💻 Coding 7:30–9 PM",events:[
- ["Until 2:00 PM","🏫 School","School"],["2:30–3:00","Lunch","Break"],["3:00–4:00","📐 Mathematics","Study"],["4:00–5:00","📝 Arabic","Study"],["5:00–5:30","Break","Break"],["5:30–6:30","🌍 Social studies","Study"],["6:30–7:15","Dinner and rest","Break"],["7:30–9:00","💻 Coding class","Activity"],["9:00–9:30","Break","Break"],["9:30–10:00","🎨 Art / homework","Study"]], focus:[0,3,5,8]},
- {en:"Monday",fa:"دوشنبه",badge:"🏋️ Gym 5–7 PM",events:[
- ["Until 2:00 PM","🏫 School","School"],["2:30–3:00","Lunch","Break"],["3:00–4:00","🔬 Science","Study"],["4:00–4:45","📐 Mathematics","Study"],["5:00–7:00","🏋️ Gym","Activity"],["7:00–7:45","Dinner and rest","Break"],["7:45–8:45","📚 Religious studies","Study"],["8:45–9:30","💻 Technology","Study"],["9:30–10:00","Science practice","Study"]], focus:[1,0,7,9]},
+ ["Until 2:00 PM","🏫 School","School"],["2:00–2:30","🚗 Travel home from school","Travel"],["2:30–3:00","🍽️ Lunch","Break"],["3:00–4:00","📐 Mathematics","Study"],["4:00–5:00","📝 Arabic","Study"],["5:00–5:30","Break","Break"],["5:30–6:15","🌍 Social studies","Study"],["6:15–6:45","🍽️ Dinner","Break"],["6:45–7:30","🚗 Travel to coding class","Travel"],["7:30–9:00","💻 Coding class","Activity"],["9:00–9:30","🚗 Travel home","Travel"],["9:30–10:00","🎨 Art / homework","Study"]], focus:[3,4,6,11]},
+ {en:"Monday",fa:"دوشنبه",badge:"🏋️ Gym 4–6 PM · Study before gym",events:[
+ ["Until 2:00 PM","🏫 School","School"],["2:00–2:30","🚗 Travel home from school","Travel"],["2:30–3:00","🍽️ Lunch","Break"],["3:00–3:30","🔬 Science — pre-gym study","Study"],["3:30–4:00","🚗 Travel to gym","Travel"],["4:00–6:00","🏋️ Gym","Activity"],["6:00–6:30","🚗 Travel home","Travel"],["6:30–7:00","🍽️ Dinner and rest","Break"],["7:00–8:30","📚 Religious studies and homework — block 2","Study"],["8:30–8:45","Break","Break"],["8:45–10:15","💻 Technology and science practice — block 3","Study"],["10:15–10:30","Break","Break"],["10:30–11:00","🔬 Science review","Study"]], focus:[3,8,10,12]},
  {en:"Tuesday",fa:"سه‌شنبه",badge:"🎵 Music 5:30–6 PM",events:[
- ["Until 2:00 PM","🏫 School","School"],["2:30–3:00","Lunch","Break"],["3:00–4:00","📖 Persian literature","Study"],["4:00–5:00","📝 Arabic","Study"],["5:00–5:30","Break","Break"],["5:30–6:00","🎵 Music class","Activity"],["6:00–7:00","🇬🇧 English","Study"],["7:00–7:45","Dinner","Break"],["7:45–8:45","🌱 Life skills","Study"],["8:45–9:30","Arabic practice","Study"]], focus:[2,3,4,10]},
- {en:"Wednesday",fa:"چهارشنبه",badge:"🏋️ Gym 5–7 PM",events:[
- ["Until 2:00 PM","🏫 School","School"],["2:30–3:00","Lunch","Break"],["3:00–4:00","📐 Mathematics","Study"],["4:00–4:45","🔬 Science","Study"],["5:00–7:00","🏋️ Gym","Activity"],["7:00–7:45","Dinner and rest","Break"],["7:45–8:45","🌍 Social studies","Study"],["8:45–9:30","📗 Quran","Study"],["9:30–10:00","Math practice","Study"]], focus:[0,1,5,6]},
+ ["Until 2:00 PM","🏫 School","School"],["2:00–2:30","🚗 Travel home from school","Travel"],["2:30–3:00","🍽️ Lunch","Break"],["3:00–4:00","📖 Persian literature","Study"],["4:00–5:00","📝 Arabic","Study"],["5:00–5:30","🚗 Travel to music class","Travel"],["5:30–6:00","🎵 Music class","Activity"],["6:00–6:30","🚗 Travel home","Travel"],["6:30–7:15","🇬🇧 English","Study"],["7:15–8:00","🍽️ Dinner","Break"],["8:00–9:00","🌱 Life skills","Study"],["9:00–9:45","Arabic practice","Study"]], focus:[3,4,8,10,11]},
+ {en:"Wednesday",fa:"چهارشنبه",badge:"🏋️ Gym 4–6 PM · Study before gym",events:[
+ ["Until 2:00 PM","🏫 School","School"],["2:00–2:30","🚗 Travel home from school","Travel"],["2:30–3:00","🍽️ Lunch","Break"],["3:00–3:30","📐 Mathematics — pre-gym study","Study"],["3:30–4:00","🚗 Travel to gym","Travel"],["4:00–6:00","🏋️ Gym","Activity"],["6:00–6:30","🚗 Travel home","Travel"],["6:30–7:00","🍽️ Dinner and rest","Break"],["7:00–8:30","🌍 Social studies and homework — block 2","Study"],["8:30–8:45","Break","Break"],["8:45–10:15","📗 Quran and review — block 3","Study"],["10:15–10:30","Break","Break"],["10:30–11:00","📐 Mathematics practice","Study"]], focus:[3,8,10,12]},
  {en:"Thursday",fa:"پنجشنبه",badge:"🇮🇷 Persian · 🇬🇧 English class",events:[
- ["9:00–10:00","📐 Mathematics","Study"],["10:00–10:45","🔬 Science","Study"],["10:45–11:30","Break","Break"],["11:30–2:00","🇮🇷 Persian class","Activity"],["2:00–3:00","Lunch and rest","Break"],["3:00–3:45","📝 Arabic","Study"],["4:00–5:00","🇬🇧 English class","Activity"],["5:00–5:30","Break","Break"],["5:30–6:30","💻 Technology","Study"],["6:30–7:00","🎨 Art","Study"],["7:00 onward","Dinner and free time","Break"]], focus:[0,1,2,3,8,9]},
+ ["9:00–10:00","📐 Mathematics","Study"],["10:00–10:30","🔬 Science","Study"],["10:30–11:00","Break","Break"],["11:00–11:30","🚗 Travel to Persian class","Travel"],["11:30–2:00","🇮🇷 Persian class","Activity"],["2:00–2:30","🚗 Travel home","Travel"],["2:30–3:00","🍽️ Lunch and rest","Break"],["3:00–3:30","📝 Arabic","Study"],["3:30–4:00","🚗 Travel to English class","Travel"],["4:00–5:00","🇬🇧 English class","Activity"],["5:00–5:30","🚗 Travel home","Travel"],["5:30–6:15","💻 Technology","Study"],["6:15–6:45","🎨 Art","Study"],["6:45 onward","Dinner and free time","Break"]], focus:[0,1,7,11,12]},
  {en:"Friday",fa:"جمعه",badge:"🎮 Free day after study",events:[
- ["9:00–10:00","📐 Mathematics","Study"],["10:00–11:00","🔬 Science","Study"],["11:00–11:30","Break","Break"],["11:30–12:30","📝 Arabic","Study"],["12:30–2:00","Lunch and rest","Break"],["2:00–3:00","📖 Persian literature","Study"],["3:00–4:00","🇬🇧 English","Study"],["After 4:00","🎮 Free time","Free"]], focus:[0,1,2,3,4,5,6,7,8,9,10]}
+ ["9:00–10:00","📐 Mathematics","Study"],["10:00–11:00","🔬 Science","Study"],["11:00–11:30","Break","Break"],["11:30–12:30","📝 Arabic","Study"],["12:30–2:00","Lunch and rest","Break"],["2:00–3:00","📖 Persian literature","Study"],["3:00–4:00","🇬🇧 English","Study"],["After 4:00","🎮 Free time","Free"]], focus:[0,1,3,5,6]}
 ];
 let selected=0;
 const storeKey="class74planner_v1";
@@ -309,8 +331,24 @@ function render(){
  document.getElementById("events").querySelectorAll("input").forEach(x=>x.addEventListener("change",()=>{dayData().events[x.dataset.event]=x.checked;persist();updateDayProgress()}));
  document.getElementById("tabs").innerHTML=days.map((x,i)=>`<button class="tab ${i===selected?'active':''}" data-day="${i}">${x.fa}</button>`).join("");
  document.querySelectorAll("[data-day]").forEach(b=>b.addEventListener("click",()=>{selected=+b.dataset.day;render()}));
- updateDayProgress();renderTasks();renderStats();
+ updateDayProgress();renderTasks();renderStats();renderStudyTracker();
 }
+function renderStudyTracker(){
+ const minutes=Number(dayData().studyMinutes)||0;
+ const input=document.getElementById("studyMinutes");
+ if(input) input.value=minutes;
+ const progress=document.getElementById("studyProgress");
+ if(progress) progress.textContent=`${minutes} / 300 min · ${(minutes/60).toFixed(1)} / 5 hours${minutes>=300?" · Goal reached ✓":""}`;
+ const bar=document.getElementById("studyBar");
+ if(bar) bar.style.width=Math.min(100,minutes/3)+"%";
+}
+document.getElementById("saveStudyMinutes").addEventListener("click",()=>{
+ const input=document.getElementById("studyMinutes");
+ const value=Number(input.value);
+ if(!Number.isFinite(value)||value<0||value>1440){alert("Enter a number of minutes from 0 to 1440.");return;}
+ dayData().studyMinutes=Math.round(value);
+ persist();renderStudyTracker();
+});
 function updateDayProgress(){
  document.getElementById("checkAll").textContent=days[selected].events.every((e,i)=>dayData().events[i])?"Day completed ✓":"Mark day complete";
 }
@@ -559,6 +597,57 @@ document.getElementById("backupFile").addEventListener("change",async e=>{
 
 const baseRender=render;
 render=function(){baseRender();document.getElementById("taskDay").value=String(selected);renderTasks();renderExams();renderStats();document.getElementById("dailyNotes").value=(saved.quickNotes&&saved.quickNotes[selected])||"";document.getElementById("notesStatus").textContent="";};
+
+// Cloud sync: password is kept only in this page's memory/input and is not saved to localStorage.
+const SYNC_ENDPOINT = "https://planner-sync.arian3youtob.workers.dev/";
+async function cloudSync(method) {
+  const status = document.getElementById("cloudStatus");
+  const password = document.getElementById("syncPassword").value;
+  if (!password) {
+    status.textContent = "Enter your sync password first.";
+    document.getElementById("syncPassword").focus();
+    return;
+  }
+  const upload = method === "PUT";
+  const button = document.getElementById(upload ? "cloudUpload" : "cloudDownload");
+  button.disabled = true;
+  status.textContent = upload ? "Uploading planner data…" : "Downloading planner data…";
+  try {
+    const options = {
+      method,
+      headers: {
+        "Authorization": `Bearer ${password}`,
+        ...(upload ? {"Content-Type": "application/json"} : {})
+      },
+      ...(upload ? {body: JSON.stringify(saved)} : {})
+    };
+    const response = await fetch(SYNC_ENDPOINT, options);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || `Request failed (${response.status})`);
+    if (upload) {
+      status.textContent = "Uploaded successfully ✓ Open your planner on another device and choose Download cloud data.";
+    } else {
+      if (!result.data || typeof result.data !== "object" || !Array.isArray(result.data.tasks) || !Array.isArray(result.data.exams)) {
+        status.textContent = "There is no cloud backup yet. Use Upload on the device that has your planner data.";
+        return;
+      }
+      if (!confirm("Download cloud data? This will replace the planner data currently saved on this device.")) {
+        status.textContent = "Download cancelled.";
+        return;
+      }
+      saved = result.data;
+      safePersist();
+      render();
+      status.textContent = "Downloaded and loaded cloud data ✓";
+    }
+  } catch (error) {
+    status.textContent = `Sync failed: ${error.message}. Check your Worker settings and sync password.`;
+  } finally {
+    button.disabled = false;
+  }
+}
+document.getElementById("cloudUpload").addEventListener("click", () => cloudSync("PUT"));
+document.getElementById("cloudDownload").addEventListener("click", () => cloudSync("GET"));
 safePersist();
 
 render();
