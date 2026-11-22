@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class 7-4 Weekly Planner</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#182033;--muted:#667085;--accent:#5b5bd6;--line:#e6e9f2;--green:#15966b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+header{background:linear-gradient(135deg,#34349b,#7777e8);color:white;padding:28px 18px}
+.wrap{max-width:1050px;margin:auto;padding:0 16px}
+h1{margin:0 0 5px;font-size:clamp(24px,4vw,34px)}header p{margin:0;color:#e8e8ff}
+main{padding:20px 0 48px}.tabs{display:flex;gap:8px;overflow:auto;padding:4px 0 14px}
+button,.tab{border:0;border-radius:11px;padding:10px 14px;background:#e8e9f7;color:#30345c;font-weight:650;cursor:pointer;white-space:nowrap}
+button.primary,.tab.active{background:var(--accent);color:#fff}
+button:focus-visible,.tab:focus-visible,input:focus-visible{outline:3px solid #a5b4fc;outline-offset:2px}
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:18px;box-shadow:0 5px 18px #1725540a}
+h2{font-size:19px;margin:0 0 12px}h3{font-size:16px;margin:0 0 8px}
+.muted{color:var(--muted)}.day-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.pill{font-size:12px;background:#eeefff;color:#4545a4;padding:5px 9px;border-radius:20px;font-weight:700}
+.event{display:grid;grid-template-columns:112px 1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.event:last-child{border-bottom:0}.time{font-weight:700;color:#4b4f70;font-variant-numeric:tabular-nums}
+.event label{display:flex;align-items:center;gap:9px;cursor:pointer}.event input{width:18px;height:18px;accent-color:var(--green)}
+.event.done .event-name{text-decoration:line-through;color:#8b93a7}
+.tag{font-size:11px;color:#586078;background:#f1f3f8;padding:4px 7px;border-radius:8px}
+.progress{height:9px;background:#eceef5;border-radius:20px;overflow:hidden;margin:9px 0 5px}.bar{height:100%;width:0;background:var(--green);transition:width .2s}
+.subjects{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.subject{display:flex;gap:9px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:10px}
+.subject input{accent-color:var(--green);width:17px;height:17px}.subject small{display:block;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.note{background:#f8f8ff;border:1px solid #e5e5ff;padding:12px;border-radius:12px;color:#4d5075;font-size:13px}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
+
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.task-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
+.task-form input,.task-form select{min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px;background:white;color:var(--ink);font:inherit}
+.task-list{display:grid;gap:8px;margin-top:12px}
+.task-row{display:flex;align-items:center;gap:9px;border:1px solid var(--line);padding:9px;border-radius:10px}
+.task-row input{accent-color:var(--green);width:17px;height:17px}
+.task-row.done span{text-decoration:line-through;color:#9299aa}
+.task-row button{margin-left:auto;padding:6px 9px;background:#482a3b;color:#ffb7c7;border-color:#704057}
+.task-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.task-chip{font-size:11px;padding:3px 7px;border-radius:7px;background:#202d49;color:#b6c5e4;border:1px solid #30415f}
+.task-chip.high{background:#512b3b;color:#ffc0cf;border-color:#754054}
+.task-chip.low{background:#203d42;color:#a9e6d6;border-color:#315e60}
+.task-copy{min-width:0;overflow-wrap:anywhere}
+.task-row.overdue{border-color:#9b5262}
+.timer{text-align:center;padding:10px 0}
+.timer-number{font-size:44px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:2px}
+.timer-controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stat{background:#f7f8fc;border-radius:12px;padding:12px;text-align:center}
+.stat strong{display:block;font-size:22px}
+.small-label{font-size:12px;color:var(--muted)}
+@media(max-width:760px){.panel-grid{grid-template-columns:1fr}.task-form{grid-template-columns:1fr}.stat-grid{grid-template-columns:1fr 1fr}}
+
+@media(max-width:760px){.grid{grid-template-columns:1fr}.event{grid-template-columns:92px 1fr}.event .tag{grid-column:2;justify-self:start}.subjects{grid-template-columns:1fr}}
+
+/* ===== UI REVAMP: modern dashboard ===== */
+:root{
+  --bg:#0b1020;--card:#141d33;--ink:#eef3ff;--muted:#9aa9c7;
+  --accent:#8b7cff;--line:#273451;--green:#43d6a0;
+}
+*{box-sizing:border-box}
+body{
+  background:
+    radial-gradient(900px 420px at 8% -8%,#29245f 0%,transparent 60%),
+    radial-gradient(700px 360px at 100% 0%,#123e59 0%,transparent 58%),
+    var(--bg);
+  color:var(--ink);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+header{
+  background:linear-gradient(120deg,rgba(93,76,205,.96),rgba(27,119,151,.92));
+  padding:36px 18px 32px;border-bottom:1px solid #ffffff20;
+  box-shadow:0 18px 55px #0003;
+}
+header .wrap{max-width:1180px}
+header h1{font-size:clamp(27px,4vw,40px);letter-spacing:-1.2px}
+header p{color:#e1eaff;font-size:15px;margin-top:7px}
+main.wrap{max-width:1180px;padding-top:24px}
+.tabs{gap:9px;padding:4px 0 18px;scrollbar-width:thin}
+button,.tab{
+  border:1px solid #344363;border-radius:12px;padding:10px 15px;
+  background:#1b2741;color:#dce6ff;font-weight:700;transition:.18s ease;
+}
+button:hover,.tab:hover{transform:translateY(-1px);border-color:#8b7cff;background:#263354}
+button.primary,.tab.active{
+  background:linear-gradient(135deg,#7668ef,#4c9ed0);border-color:transparent;color:white;
+  box-shadow:0 7px 18px #6256db44;
+}
+.card{
+  background:linear-gradient(155deg,rgba(25,36,61,.98),rgba(17,26,45,.98));
+  border:1px solid #2b3a59;border-radius:20px;padding:21px;
+  box-shadow:0 12px 32px #0003;min-width:0;
+}
+h2{font-size:19px;letter-spacing:-.35px;margin-bottom:14px}
+h3{font-size:16px}
+.muted,.small-label{color:var(--muted)}
+.day-title{margin-bottom:15px}
+.day-title h2{font-size:25px;margin:2px 0 0}
+.pill{background:#302d61;color:#c9c4ff;border:1px solid #514b9b;padding:6px 11px}
+.event{padding:12px 0;border-color:#293752;grid-template-columns:120px 1fr auto}
+.time{color:#b8c7e6;font-size:13px}
+.event input,.subject input,.task-row input{accent-color:var(--green)}
+.event label{gap:11px}
+.event input{width:17px;height:17px}
+.event.done .event-name{color:#8190ad}
+.tag{background:#202d49;color:#b6c5e4;border:1px solid #30415f}
+.progress{height:10px;background:#26334e;margin:12px 0 7px}
+.bar{background:linear-gradient(90deg,#42d6a1,#5bb6ed);border-radius:20px}
+.subjects{gap:9px}
+.subject{
+  background:#192640;border:1px solid #2c3b59;border-radius:12px;padding:11px;
+  transition:.16s ease;
+}
+.subject:hover{border-color:#7f76e8;background:#202d4b}
+.subject small{color:#91a2c3;margin-top:2px}
+.actions{gap:9px;margin-top:17px}
+.note{background:#1d2c48;border:1px solid #35496d;color:#c4d2ee;border-radius:13px}
+.panel-grid{gap:16px;margin-top:16px}
+.task-form input,.task-form select,textarea{
+  background:#101a2e!important;color:var(--ink)!important;border:1px solid #344563!important;
+  border-radius:12px!important;
+}
+.task-form input::placeholder,textarea::placeholder{color:#7183a5}
+.task-row{background:#192640;border:1px solid #2b3b5b;border-radius:12px;padding:11px}
+.task-row button{background:#482a3b;color:#ffb7c7;border-color:#704057}
+.timer{padding:16px 0 19px}
+.timer-number{
+  font-size:clamp(48px,7vw,64px);letter-spacing:-2px;color:#b9b1ff;
+  text-shadow:0 0 30px #8072ff38;
+}
+.timer-controls{gap:9px}
+.stat-grid{gap:10px;grid-template-columns:repeat(2,1fr)}
+.stat{
+  background:linear-gradient(145deg,#202d4b,#18243c);
+  border:1px solid #304261;border-radius:15px;padding:15px 10px;
+}
+.stat strong{font-size:27px;color:#c4c0ff}
+.small-label{font-size:12px}
+#overview>div{border-color:#2b3b58!important;padding:13px 2px!important}
+#overview strong{color:#e4ebff}
+footer{color:#7789aa;padding:8px 0 0}
+main>.note{line-height:1.65}
+button:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid #9a91ff;outline-offset:2px
+}
+@media(min-width:1000px){
+  .grid{grid-template-columns:1.08fr .92fr;gap:18px}
+  .panel-grid{gap:18px}
+}
+@media(max-width:760px){
+  header{padding:27px 16px}
+  main.wrap{padding-top:16px}
+  .card{padding:16px;border-radius:17px}
+  .event{grid-template-columns:92px 1fr;gap:8px}
+  .event .tag{grid-column:2;justify-self:start}
+  .subjects{grid-template-columns:1fr 1fr}
+  .task-form{grid-template-columns:1fr}
+  .stat{padding:12px 6px}
+  .stat strong{font-size:22px}
+}
+@media(max-width:420px){
+  .subjects{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
+}
+
+
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>📚 Class 7-4 Weekly Planner</h1><p>Your school, activities, homework and exams</p></div></header>
+<main class="wrap">
+  <div class="tabs" id="tabs" aria-label="Choose day"></div>
+  <div class="grid">
+    <section class="card">
+      <div class="day-title"><div><div class="muted" id="dayPersian"></div><h2 id="dayName">Saturday</h2></div><span class="pill" id="dayBadge">Gym day</span></div>
+      <div id="events"></div>
+      <div class="actions">
+        <button class="primary" id="checkAll">Mark day complete</button>
+        <button id="clearDay">Clear day checks</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="panel-grid">
+    <section class="card">
+      <h2>✅ Homework & personal tasks</h2>
+      <p class="muted">Add homework, projects or things to remember.</p>
+      <form class="task-form" id="taskForm" style="grid-template-columns:1fr 1fr">
+        <input id="taskText" placeholder="e.g. Math exercises 1–5" required maxlength="90">
+        <select id="taskDay" aria-label="Task day">
+          <option value="0">Saturday</option><option value="1">Sunday</option><option value="2">Monday</option><option value="3">Tuesday</option><option value="4">Wednesday</option><option value="5">Thursday</option><option value="6">Friday</option>
+        </select>
+        <select id="taskCategory" aria-label="Task category">
+          <option>Homework</option><option>Project</option><option>Revision</option><option>Personal</option><option>Other</option>
+        </select>
+        <select id="taskPriority" aria-label="Task priority">
+          <option value="normal">Normal priority</option><option value="high">High priority</option><option value="low">Low priority</option>
+        </select>
+        <input id="taskDue" type="text" lang="fa-IR" inputmode="numeric" maxlength="10" placeholder="تاریخ شمسی (مثلاً ۱۴۰۵/۰۹/۰۱)" aria-label="تاریخ تحویل شمسی (اختیاری)">
+        <button class="primary" type="submit">Add task</button>
+      </form>
+      <p class="small-label" id="taskStatus" role="status" aria-live="polite"></p>
+      <div class="task-list" id="taskList"></div>
+    </section>
+    <section class="card">
+      <h2>🔎 Find & organize tasks</h2>
+      <p class="muted">Search this day's tasks or show only the ones you need.</p>
+      <input id="taskSearch" type="search" placeholder="Search tasks..." style="width:100%;padding:11px;border:1px solid #344563;border-radius:12px;background:#101a2e;color:var(--ink);font:inherit">
+      <div class="actions" style="margin-top:10px">
+        <button type="button" class="primary" data-task-filter="all">All</button>
+        <button type="button" data-task-filter="pending">To do</button>
+        <button type="button" data-task-filter="done">Completed</button>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><strong id="dayTaskTotal">0</strong><span class="small-label">Today's tasks</span></div>
+        <div class="stat"><strong id="dayTaskPending">0</strong><span class="small-label">Still to do</span></div>
+      </div>
+      <p class="note" style="margin-top:12px">نکته: برای پیدا کردن آسان‌تر تکالیف مهم، اولویت و تاریخ تحویل تعیین کن. تاریخ‌ها به تقویم شمسی نمایش داده می‌شوند.</p>
+    </section>
+  </div>
+  <div class="panel-grid">
+    <section class="card">
+      <h2>🎯 Weekly goals</h2>
+      <div class="stat-grid">
+        <div class="stat"><strong id="tasksDone">0</strong><span class="small-label">Tasks done</span></div>
+        <div class="stat"><strong id="eventsDone">0</strong><span class="small-label">Schedule items checked</span></div>
+      </div>
+      <p class="muted" id="weeklyMessage" style="margin-bottom:0">Keep your plan realistic and remember to take breaks.</p>
+    </section>
+    <section class="card">
+      <h2>📝 Exams & deadlines</h2>
+      <p class="muted">Add each exam or deadline separately and track it here.</p>
+      <form id="examForm" class="task-form" style="grid-template-columns:1fr 1fr">
+        <input id="examTitle" maxlength="90" placeholder="Exam / project name" required>
+        <select id="examSubject" aria-label="Exam subject">
+          <option value="">Choose subject</option><option>ریاضی</option><option>علوم</option><option>ادبیات</option><option>عربی</option><option>زبان</option><option>مطالعات اجتماعی</option><option>قرآن</option><option>هدیه آسمانی</option><option>هنر</option><option>فناوری</option><option>سبک زندگی</option><option>Other</option>
+        </select>
+        <input id="examDate" type="text" lang="fa-IR" inputmode="numeric" maxlength="10" placeholder="تاریخ شمسی (مثلاً ۱۴۰۵/۰۹/۰۱)" aria-label="تاریخ امتحان شمسی" required>
+        <input id="examDetails" maxlength="180" placeholder="Chapters or details (optional)">
+        <button class="primary" type="submit" style="grid-column:1/-1">Add exam / deadline</button>
+      </form>
+      <div id="examList" class="task-list" style="margin-top:12px"></div>
+      <span class="muted" id="examStatus" aria-live="polite"></span>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <h2>📅 Weekly overview</h2>
+    <div class="muted">Your fixed activities and study focus at a glance.</div>
+    <div id="overview" style="margin-top:12px"></div>
+  </section>
+  <div class="panel-grid">
+    <section class="card">
+      <h2>🗒️ Daily notes</h2>
+      <p class="muted">Save reminders or ideas for the selected day.</p>
+      <textarea id="dailyNotes" rows="5" maxlength="1200" placeholder="Write a reminder, a question for your teacher, or something to remember..." style="width:100%;padding:12px;border:1px solid #344563;border-radius:12px;background:#101a2e;color:var(--ink);font:inherit;resize:vertical"></textarea>
+      <div class="actions"><button class="primary" type="button" id="saveNotes">Save notes</button><span class="muted" id="notesStatus" aria-live="polite"></span></div>
+    </section>
+    <section class="card">
+      <h2>💾 Backup & restore</h2>
+      <p class="muted">Download a backup of your schedule, tasks, exams and notes. Keep it somewhere safe.</p>
+      <div class="actions">
+        <button type="button" class="primary" id="exportBackup">Download backup</button>
+        <button type="button" id="chooseBackup">Restore backup</button>
+        <input type="file" id="backupFile" accept="application/json,.json" hidden>
+      </div>
+      <p class="small-label" id="backupStatus" aria-live="polite">Your data stays in this browser unless you export a backup.</p>
+    </section>
+  </div>
+  <p class="note" style="margin-top:16px">Your progress is saved in this browser on this device. Study blocks are a suggested plan: take breaks, adjust them around homework and travel, and don't sacrifice sleep to finish every block.</p>
+  <footer>Class 7-4 · Saturday to Friday · Personal study planner</footer>
+</main>
+<script>
+const subjects = [
+ ["📐","ریاضی","Mathematics"],["🔬","علوم","Science"],["📖","ادبیات","Persian literature"],
+ ["📝","عربی","Arabic"],["🇬🇧","زبان","English"],["🌍","مطالعات اجتماعی","Social studies"],
+ ["📗","قرآن","Quran"],["📚","هدیه آسمانی","Religious studies"],["🎨","هنر","Art"],
+ ["💻","فناوری","Technology"],["🌱","سبک زندگی","Life skills"]
+];
+const days = [
+ {en:"Saturday",fa:"شنبه",badge:"🏋️ Gym 5–7 PM",events:[
+ ["Until 2:00 PM","🏫 School","School"],["2:30–3:00","🍽️ Lunch","Break"],["3:00–4:00","📐 Mathematics","Study"],["4:00–4:45","🔬 Science","Study"],["4:45–5:00","Get ready / travel","Break"],["5:00–7:00","🏋️ Gym","Activity"],["7:00–7:30","Dinner and rest","Break"],["7:30–8:30","📖 Persian literature","Study"],["8:30–9:00","📗 Quran","Study"],["9:00–9:15","Break","Break"],["9:15–10:00","📐 Mathematics practice","Study"]], focus:[0,1,2,6]},
+ {en:"Sunday",fa:"یکشنبه",badge:"💻 Coding 7:30–9 PM",events:[
+ ["Until 2:00 PM","🏫 School","School"],["2:30–3:00","Lunch","Break"],["3:00–4:00","📐 Mathematics","Study"],["4:00–5:00","📝 Arabic","Study"],["5:00–5:30","Break","Break"],["5:30–6:30","🌍 Social studies","Study"],["6:30–7:15","Dinner and rest","Break"],["7:30–9:00","💻 Coding class","Activity"],["9:00–9:30","Break","Break"],["9:30–10:00","🎨 Art / homework","Study"]], focus:[0,3,5,8]},
+ {en:"Monday",fa:"دوشنبه",badge:"🏋️ Gym 5–7 PM",events:[
+ ["Until 2:00 PM","🏫 School","School"],["2:30–3:00","Lunch","Break"],["3:00–4:00","🔬 Science","Study"],["4:00–4:45","📐 Mathematics","Study"],["5:00–7:00","🏋️ Gym","Activity"],["7:00–7:45","Dinner and rest","Break"],["7:45–8:45","📚 Religious studies","Study"],["8:45–9:30","💻 Technology","Study"],["9:30–10:00","Science practice","Study"]], focus:[1,0,7,9]},
+ {en:"Tuesday",fa:"سه‌شنبه",badge:"🎵 Music 5:30–6 PM",events:[
+ ["Until 2:00 PM","🏫 School","School"],["2:30–3:00","Lunch","Break"],["3:00–4:00","📖 Persian literature","Study"],["4:00–5:00","📝 Arabic","Study"],["5:00–5:30","Break","Break"],["5:30–6:00","🎵 Music class","Activity"],["6:00–7:00","🇬🇧 English","Study"],["7:00–7:45","Dinner","Break"],["7:45–8:45","🌱 Life skills","Study"],["8:45–9:30","Arabic practice","Study"]], focus:[2,3,4,10]},
+ {en:"Wednesday",fa:"چهارشنبه",badge:"🏋️ Gym 5–7 PM",events:[
+ ["Until 2:00 PM","🏫 School","School"],["2:30–3:00","Lunch","Break"],["3:00–4:00","📐 Mathematics","Study"],["4:00–4:45","🔬 Science","Study"],["5:00–7:00","🏋️ Gym","Activity"],["7:00–7:45","Dinner and rest","Break"],["7:45–8:45","🌍 Social studies","Study"],["8:45–9:30","📗 Quran","Study"],["9:30–10:00","Math practice","Study"]], focus:[0,1,5,6]},
+ {en:"Thursday",fa:"پنجشنبه",badge:"🇮🇷 Persian · 🇬🇧 English class",events:[
+ ["9:00–10:00","📐 Mathematics","Study"],["10:00–10:45","🔬 Science","Study"],["10:45–11:30","Break","Break"],["11:30–2:00","🇮🇷 Persian class","Activity"],["2:00–3:00","Lunch and rest","Break"],["3:00–3:45","📝 Arabic","Study"],["4:00–5:00","🇬🇧 English class","Activity"],["5:00–5:30","Break","Break"],["5:30–6:30","💻 Technology","Study"],["6:30–7:00","🎨 Art","Study"],["7:00 onward","Dinner and free time","Break"]], focus:[0,1,2,3,8,9]},
+ {en:"Friday",fa:"جمعه",badge:"🎮 Free day after study",events:[
+ ["9:00–10:00","📐 Mathematics","Study"],["10:00–11:00","🔬 Science","Study"],["11:00–11:30","Break","Break"],["11:30–12:30","📝 Arabic","Study"],["12:30–2:00","Lunch and rest","Break"],["2:00–3:00","📖 Persian literature","Study"],["3:00–4:00","🇬🇧 English","Study"],["After 4:00","🎮 Free time","Free"]], focus:[0,1,2,3,4,5,6,7,8,9,10]}
+];
+let selected=0;
+const storeKey="class74planner_v1";
+let saved={};
+try{saved=JSON.parse(localStorage.getItem(storeKey)||"{}")}catch(e){saved={}}
+function persist(){localStorage.setItem(storeKey,JSON.stringify(saved))}
+function dayData(){return saved[selected] ||= {events:{},subjects:{}}}
+function render(){
+ const d=days[selected]; document.getElementById("dayName").textContent=d.en;
+ document.getElementById("dayPersian").textContent=d.fa;document.getElementById("dayBadge").textContent=d.badge;
+ document.getElementById("events").innerHTML=d.events.map((e,i)=>`<div class="event ${dayData().events[i]?'done':''}"><span class="time">${e[0]}</span><label><input type="checkbox" data-event="${i}" ${dayData().events[i]?'checked':''}><span class="event-name">${e[1]}</span></label><span class="tag">${e[2]}</span></div>`).join("");
+ document.getElementById("events").querySelectorAll("input").forEach(x=>x.addEventListener("change",()=>{dayData().events[x.dataset.event]=x.checked;persist();updateDayProgress()}));
+ document.getElementById("tabs").innerHTML=days.map((x,i)=>`<button class="tab ${i===selected?'active':''}" data-day="${i}">${x.fa}</button>`).join("");
+ document.querySelectorAll("[data-day]").forEach(b=>b.addEventListener("click",()=>{selected=+b.dataset.day;render()}));
+ updateDayProgress();renderTasks();renderStats();
+}
+function updateDayProgress(){
+ document.getElementById("checkAll").textContent=days[selected].events.every((e,i)=>dayData().events[i])?"Day completed ✓":"Mark day complete";
+}
+document.getElementById("checkAll").onclick=()=>{days[selected].events.forEach((e,i)=>dayData().events[i]=true);persist();render()};
+document.getElementById("clearDay").onclick=()=>{dayData().events={};persist();render()};
+document.getElementById("overview").innerHTML=days.map((d,i)=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)"><strong>${d.fa} · ${d.en}</strong><span class="muted">${d.badge}</span></div>`).join("");
+
+// Homework, exam/deadline tracker and weekly totals.
+if (!Array.isArray(saved.tasks)) saved.tasks = [];
+if (!Array.isArray(saved.exams)) {
+  saved.exams = [];
+  if (typeof saved.notes === "string" && saved.notes.trim())
+    saved.exams.push({title:"Previous exam notes",subject:"Other",date:"",details:saved.notes,done:false});
+}
+
+function safePersist(){
+  try { localStorage.setItem(storeKey,JSON.stringify(saved)); return true; }
+  catch(err){ alert("Could not save. Please enable browser storage."); return false; }
+}
+
+function formatIranianDate(isoDate) {
+  if (!isoDate) return "بدون تاریخ";
+  const parts = isoDate.split("-").map(Number);
+  if (parts.length !== 3 || parts.some(n => !Number.isFinite(n))) return isoDate;
+  // Use UTC to avoid timezone shifts when formatting date-only values.
+  const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], 12));
+  try {
+    return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+      year: "numeric", month: "long", day: "numeric",
+      timeZone: "UTC"
+    }).format(date);
+  } catch (error) {
+    return isoDate;
+  }
+}
+
+function parseIranianDate(input) {
+  if (!input) return "";
+  const latin = String(input).trim()
+    .replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
+    .replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+    .replace(/[.\-]/g, "/");
+  const match = latin.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  if (!match) return null;
+  const jy = Number(match[1]), jm = Number(match[2]), jd = Number(match[3]);
+  if (jy < 1200 || jy > 1600 || jm < 1 || jm > 12 || jd < 1 || jd > 31) return null;
+
+  try {
+    const fmt = new Intl.DateTimeFormat("en-US-u-ca-persian-nu-latn", {
+      year: "numeric", month: "numeric", day: "numeric", timeZone: "UTC"
+    });
+    const persianParts = timestamp => {
+      const parts = fmt.formatToParts(new Date(timestamp));
+      return {
+        year: Number(parts.find(x => x.type === "year").value),
+        month: Number(parts.find(x => x.type === "month").value),
+        day: Number(parts.find(x => x.type === "day").value)
+      };
+    };
+
+    // Locate the first day of the requested Persian year around 21 March.
+    const estimate = Date.UTC(jy + 621, 2, 19, 12);
+    let start = null;
+    for (let offset = -3; offset <= 3; offset++) {
+      const candidate = estimate + offset * 86400000;
+      const parts = persianParts(candidate);
+      if (parts.year === jy && parts.month === 1 && parts.day === 1) {
+        start = candidate;
+        break;
+      }
+    }
+    if (start === null) return null;
+
+    const daysBeforeMonth = jm <= 6 ? (jm - 1) * 31 : 186 + (jm - 7) * 30;
+    const result = start + (daysBeforeMonth + jd - 1) * 86400000;
+    const check = persianParts(result);
+    if (check.year !== jy || check.month !== jm || check.day !== jd) return null;
+    const date = new Date(result);
+    return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+  } catch (error) {
+    return null;
+  }
+}
+
+
+function escapeText(s){
+ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+let taskFilter="all";
+function renderTasks(){
+ const list=document.getElementById("taskList");
+ const search=(document.getElementById("taskSearch")?.value||"").trim().toLowerCase();
+ const dayTasks=saved.tasks.map((t,i)=>({...t,index:i})).filter(t=>Number(t.day)===selected);
+ document.getElementById("dayTaskTotal").textContent=dayTasks.length;
+ document.getElementById("dayTaskPending").textContent=dayTasks.filter(t=>!t.done).length;
+ const filtered=dayTasks.filter(t=>{
+   const matchesSearch=String(t.text||"").toLowerCase().includes(search) || String(t.category||"").toLowerCase().includes(search);
+   const matchesFilter=taskFilter==="all" || (taskFilter==="done"&&t.done) || (taskFilter==="pending"&&!t.done);
+   return matchesSearch&&matchesFilter;
+ }).sort((a,b)=>({high:0,normal:1,low:2}[a.priority||"normal"]-({high:0,normal:1,low:2}[b.priority||"normal"])));
+ list.innerHTML=filtered.length?filtered.map(t=>{
+   const due=t.due?new Date(t.due+"T23:59:59"):null;
+   const overdue=due&&!t.done&&due.getTime()<Date.now();
+   return `<div class="task-row ${t.done?'done':''} ${overdue?'overdue':''}">
+    <input type="checkbox" data-task="${t.index}" ${t.done?'checked':''} aria-label="Mark task complete">
+    <div class="task-copy"><strong>${escapeText(t.text)}</strong>
+      <div class="task-meta">
+        <span class="task-chip">${escapeText(t.category||"Homework")}</span>
+        <span class="task-chip ${t.priority==='high'?'high':t.priority==='low'?'low':''}">${t.priority==='high'?'High':t.priority==='low'?'Low':'Normal'} priority</span>
+        ${t.due?`<span class="task-chip ${overdue?'high':''}">${overdue?'عقب‌افتاده · ': 'تحویل · '}${escapeText(formatIranianDate(t.due))}</span>`:''}
+      </div>
+    </div><button type="button" data-delete="${t.index}">Delete</button>
+   </div>`;
+ }).join(""):'<p class="muted">No tasks match this view.</p>';
+ list.querySelectorAll("[data-task]").forEach(el=>el.onchange=()=>{
+   const t=saved.tasks[Number(el.dataset.task)]; if(t){t.done=el.checked;safePersist();renderTasks();renderStats();}
+ });
+ list.querySelectorAll("[data-delete]").forEach(el=>el.onclick=()=>{
+   const i=Number(el.dataset.delete);if(i>=0&&i<saved.tasks.length){saved.tasks.splice(i,1);safePersist();renderTasks();renderStats();}
+ });
+}
+function renderExams(){
+ const list=document.getElementById("examList");
+ const ordered=saved.exams.map((e,i)=>({...e,index:i})).sort((a,b)=>!a.date?1:!b.date?-1:a.date.localeCompare(b.date));
+ list.innerHTML=ordered.length?ordered.map(e=>`
+  <div class="task-row ${e.done?'done':''}" style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px">
+   <input type="checkbox" data-exam-done="${e.index}" ${e.done?'checked':''} aria-label="Mark exam complete">
+   <span><strong>${escapeText(e.title)}</strong><small style="display:block;color:var(--muted)">${escapeText(e.subject||"Other")} · ${e.date?escapeText(formatIranianDate(e.date)):"بدون تاریخ"}${e.details?' · '+escapeText(e.details):''}</small></span>
+   <button type="button" data-exam-delete="${e.index}">Delete</button>
+  </div>`).join(""):'<p class="muted">No exams or deadlines added yet.</p>';
+ list.querySelectorAll("[data-exam-done]").forEach(el=>el.onchange=()=>{const e=saved.exams[Number(el.dataset.examDone)];if(e){e.done=el.checked;safePersist();renderExams();}});
+ list.querySelectorAll("[data-exam-delete]").forEach(el=>el.onclick=()=>{const i=Number(el.dataset.examDelete);if(i>=0&&i<saved.exams.length){saved.exams.splice(i,1);safePersist();renderExams();}});
+}
+function renderStats(){
+ const all=Object.keys(saved).filter(k=>/^[0-6]$/.test(k)).map(k=>saved[k]).filter(v=>v&&typeof v==="object");
+ const events=all.reduce((n,d)=>n+Object.values(d.events||{}).filter(Boolean).length,0);
+ const tasks=saved.tasks.filter(t=>t.done).length;
+ document.getElementById("tasksDone").textContent=tasks;
+ document.getElementById("eventsDone").textContent=events;
+ document.getElementById("weeklyMessage").textContent=tasks+events===0?"Start by checking off one small task.":"Nice progress! Remember to balance study with rest.";
+}
+document.getElementById("taskForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const input = document.getElementById("taskText");
+  const text = input.value.trim();
+  const day = Number(document.getElementById("taskDay").value);
+  const dueText = document.getElementById("taskDue").value.trim();
+  const due = dueText ? parseIranianDate(dueText) : "";
+  const status = document.getElementById("taskStatus");
+
+  if (!text) {
+    status.textContent = "Please enter a task name.";
+    input.focus();
+    return;
+  }
+  if (!Number.isInteger(day) || day < 0 || day > 6) {
+    status.textContent = "Please choose a valid day.";
+    return;
+  }
+  if (dueText && !due) {
+    status.textContent = "Enter the due date as a valid Persian date, for example ۱۴۰۵/۰۹/۰۱.";
+    document.getElementById("taskDue").focus();
+    return;
+  }
+
+  saved.tasks.push({
+    text, day, done: false,
+    category: document.getElementById("taskCategory").value,
+    priority: document.getElementById("taskPriority").value,
+    due
+  });
+  selected = day;
+  input.value = "";
+  document.getElementById("taskDue").value = "";
+  const persisted = safePersist();
+  render();
+  status.textContent = persisted ? "Task added ✓" : "Task added for this session, but browser storage could not save it.";
+});
+
+document.getElementById("taskDay").addEventListener("change", () => {
+  const day = Number(document.getElementById("taskDay").value);
+  if (Number.isInteger(day) && day >= 0 && day <= 6) {
+    selected = day;
+    render();
+  }
+});
+
+document.getElementById("examForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const title = document.getElementById("examTitle").value.trim();
+  const dateText = document.getElementById("examDate").value.trim();
+  const date = parseIranianDate(dateText);
+  const status = document.getElementById("examStatus");
+  if (!title) {
+    status.textContent = "Enter an exam or deadline name.";
+    document.getElementById("examTitle").focus();
+    return;
+  }
+  if (!date) {
+    status.textContent = "Enter a valid Persian date, for example ۱۴۰۵/۰۹/۰۱.";
+    document.getElementById("examDate").focus();
+    return;
+  }
+
+  saved.exams.push({
+    title,
+    subject: document.getElementById("examSubject").value || "Other",
+    date,
+    details: document.getElementById("examDetails").value.trim(),
+    done: false
+  });
+  const persisted = safePersist();
+  e.target.reset();
+  renderExams();
+  status.textContent = persisted ? "Exam added ✓" : "Exam added for this session, but browser storage could not save it.";
+});
+document.getElementById("taskSearch").addEventListener("input",renderTasks);
+document.querySelectorAll("[data-task-filter]").forEach(btn=>btn.addEventListener("click",()=>{
+ taskFilter=btn.dataset.taskFilter;
+ document.querySelectorAll("[data-task-filter]").forEach(b=>b.classList.toggle("primary",b===btn));
+ renderTasks();
+}));
+document.getElementById("dailyNotes").value=(saved.quickNotes&&saved.quickNotes[selected])||"";
+document.getElementById("saveNotes").onclick=()=>{
+ saved.quickNotes ||= {};
+ saved.quickNotes[selected]=document.getElementById("dailyNotes").value;
+ safePersist();document.getElementById("notesStatus").textContent="Saved ✓";
+};
+document.getElementById("exportBackup").onclick=()=>{
+ const blob=new Blob([JSON.stringify(saved,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="class-7-4-planner-backup.json";a.click();URL.revokeObjectURL(url);
+ document.getElementById("backupStatus").textContent="Backup downloaded ✓";
+};
+document.getElementById("chooseBackup").onclick=()=>document.getElementById("backupFile").click();
+document.getElementById("backupFile").addEventListener("change",async e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ try{
+   const imported=JSON.parse(await file.text());
+   if(!imported||typeof imported!=="object"||!Array.isArray(imported.tasks)||!Array.isArray(imported.exams))throw new Error("Invalid backup");
+   if(!confirm("Restore this backup? It will replace the planner data currently saved in this browser."))return;
+   saved=imported;safePersist();document.getElementById("backupStatus").textContent="Backup restored ✓";render();
+ }catch(err){document.getElementById("backupStatus").textContent="Could not read that backup file.";}
+ e.target.value="";
+});
+
+const baseRender=render;
+render=function(){baseRender();document.getElementById("taskDay").value=String(selected);renderTasks();renderExams();renderStats();document.getElementById("dailyNotes").value=(saved.quickNotes&&saved.quickNotes[selected])||"";document.getElementById("notesStatus").textContent="";};
+safePersist();
+
+render();
+</script>
+</body></html>
